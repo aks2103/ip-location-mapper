@@ -50,7 +50,7 @@ on:
 
 env:
   PROJECT_ID: speedy-elf-396105 # TODO: update Google Cloud project id
-  GAR_LOCATION: us-central1-docker.pkg.dev/speedy-elf-396105/dexters-lab # TODO: update Artifact Registry location
+  GAR_LOCATION: us-central1 # TODO: update Artifact Registry location
   SERVICE: ip-location-mapper-new # TODO: update Cloud Run service name
   REGION: us-central1 # TODO: update Cloud Run service region
 
