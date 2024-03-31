@@ -21,8 +21,14 @@ FROM nginx:stable-alpine as production-stage
 # Copy the built assets from the build-stage into the default serve directory
 COPY --from=build-stage /app/build /usr/share/nginx/html
 
-# Expose port 80 to the outside once the container has launched
-EXPOSE 80
+# Remove the default Nginx configuration file
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Start Nginx and keep it running in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the Nginx configuration template file from your project
+COPY nginx.conf.template /etc/nginx/conf.d/nginx.conf.template
+
+# Expose any port. At runtime, Cloud Run will set the PORT environment variable to the port you should listen on.
+EXPOSE ${PORT}
+
+# Use 'envsubst' to replace the ${PORT} variable and start Nginx
+CMD ["sh", "-c", "envsubst '\\$PORT' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"]
