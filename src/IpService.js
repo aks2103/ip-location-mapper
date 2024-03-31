@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_KEY = process.env.API_KEY; // Replace with your ipinfo.io API key
+const API_KEY = process.env.API_KEY; // 'c8fbec910d24e9';
 const BASE_URL = 'https://ipinfo.io';
 
 const getIpAddress = async () => {

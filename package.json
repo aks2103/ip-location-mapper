@@ -12,6 +12,7 @@
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
+    "react-recaptcha-google": "^1.1.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
