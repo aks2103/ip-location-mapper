@@ -109,9 +109,9 @@ jobs:
       - name: Build and Push Container
         run: |-
           # docker build -t ${{ env.CR_SERVICE }}:latest -t ${{ env.CR_SERVICE }}:latest .
-          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}:${{ env.CR_SERVICE }}:latest" -t ${{ env.CR_SERVICE }}:latest .
+          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:latest" -t ${{ env.CR_SERVICE }}:latest .
           # docker tag ${{ env.CR_SERVICE }} ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}
-          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}:${{ env.CR_SERVICE }}"
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:latest"
 
       # END - Docker auth and build
 
