@@ -84,8 +84,9 @@ jobs:
       # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v2
         with:
+          version: '>= 363.0.0'
           service_account_key: ${{ secrets.GCP_CREDENTIALS }}
           export_default_credentials: true
 
