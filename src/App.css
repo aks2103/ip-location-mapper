@@ -13,17 +13,6 @@
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
 .App-link {
   color: #61dafb;
 }
@@ -36,3 +25,52 @@
     transform: rotate(360deg);
   }
 }
+
+.App-header {
+  background-color: #add19e;
+  min-height: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.header-info {
+  background-color: #add19e;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  display: flex; /* Aligns children in a row */
+  justify-content: space-around; /* Distributes children with space around them */
+  align-items: center; /* Aligns children vertically */
+  flex-wrap: wrap; /* Allows items to wrap onto the next line on small screens */
+  width: 100%; /* Take full width of its container */
+  box-sizing: border-box; /* Makes sure padding doesn't affect the total width */
+}
+
+.header-info p {
+  color: #333;
+  font-size: 1.1rem;
+  margin: 0 10px; /* Spacing between items */
+  font-weight: 500;
+}
+
+/* Style for individual info items */
+.info-item {
+  background-color: #fff;
+  padding: 10px 20px; /* Adds more horizontal padding */
+  border-radius: 5px;
+  margin: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* Avoid flex items to shrink smaller than their content */
+  flex-shrink: 0; 
+}
+
+/* Optional: Add some hover effect */
+.info-item:hover {
+  background-color: #e9e9e9;
+}
+
+
