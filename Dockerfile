@@ -1,27 +1,28 @@
 # Stage 1: Build the React application
-FROM node:latest as build-stage
+FROM node:latest as build
 
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
+# Copy package.json and package-lock.json to work directory
 COPY package*.json ./
 
 # Install project dependencies
 RUN npm install
 
-# Copy project files and folders to the current working directory (i.e., "app" folder)
+# Copy project files into the docker image
 COPY . .
 
-# Build the app
+# Build the application for production
 RUN npm run build
 
-# Stage 2: Serve the app with Nginx
-FROM nginx:stable-alpine as production-stage
+# Stage 2: Serve the build using Nginx
+FROM nginx:stable-alpine
 
-# Copy the built assets from the build-stage into the default serve directory
-COPY --from=build-stage /app/build /usr/share/nginx/html
+# Copy the build output to replace the default nginx contents.
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Expose port 80 to the outside once the container has launched
+# Expose port 80 to the outer world
 EXPOSE 80
 
 # Start Nginx and keep it running in the foreground

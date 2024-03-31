@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import { getIpAddress } from './IpService';
 import LocationMap from './LocationMap';
-import { isMobile } from 'react-device-detect';
+import { isMobile, osName, osVersion, browserName, browserVersion } from 'react-device-detect';
 
 function App() {
   const [ipInfo, setIpInfo] = useState({ ip: '', country: '', city: '' });
-  const [location, setLocation] = useState(null); // State to store the geolocation
+  const [location, setLocation] = useState(null);
   const deviceType = isMobile ? 'Mobile' : 'Desktop';
+  const osDetails = `${osName} ${osVersion}`;
+  const browserDetails = `${browserName} ${browserVersion}`;
 
   useEffect(() => {
     // Get IP address information
@@ -17,7 +19,7 @@ function App() {
         setIpInfo({
           ip: data.ip,
           country: data.country,
-          city: data.city // Assuming the API returns a 'city' field
+          city: data.city
         });
       } catch (error) {
         console.error('Error fetching IP info:', error);
@@ -50,9 +52,11 @@ function App() {
       <header className="App-header">
         <div className="header-info">
           <p className="info-item">Device: {deviceType}</p>
-          <p className="info-item">IP Address: {ipInfo.ip}</p>
+          <p className="info-item">OS: {osDetails}</p>
+          <p className="info-item">Browser: {browserDetails}</p>
+          <p className="info-item">IPv4: {ipInfo.ip}</p>
+          <p className="info-item">City: {ipInfo.city}</p>
           <p className="info-item">Country: {ipInfo.country}</p>
-          <p className="info-item">City: {ipInfo.city}</p> {/* Displaying the city */}
         </div>
         {ipInfo.ip && <LocationMap location={ipInfo.loc || (location && `${location.lat},${location.lon}`)} />}
       </header>
