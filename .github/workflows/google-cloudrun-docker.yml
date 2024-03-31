@@ -51,7 +51,7 @@ on:
 env:
   PROJECT_ID: speedy-elf-396105 # TODO: update Google Cloud project id
   GAR_LOCATION: us-central1 # TODO: update Artifact Registry location
-  SERVICE: ip-location-mapper-new # TODO: update Cloud Run service name
+  SERVICE: dexters-lab # TODO: update Cloud Run service name
   REGION: us-central1 # TODO: update Cloud Run service region
 
 jobs:
@@ -86,16 +86,15 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          version: '>= 363.0.0'
-          service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-          export_default_credentials: true
+          version: ">= 363.0.0"
+          project_id: ${{ env.PROJECT_ID }}
 
       # After successfully authenticating with Google Cloud in previous steps...
       - name: Authenticate Docker with gcloud
         run: |
           echo "$(gcloud auth print-access-token)" | docker login -u oauth2accesstoken \
           --password-stdin https://${{ env.GAR_LOCATION }}-docker.pkg.dev
-          
+
       # # Authenticate Docker to Google Cloud Artifact Registry
       # - name: Docker Auth
       #   id: docker-auth
