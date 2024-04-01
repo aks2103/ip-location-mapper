@@ -12,6 +12,7 @@ env:
   REGION: us-central1
 
 jobs:
+  # Build        
   build:
     # Add 'id-token' with the intended permissions for workload identity federation
     permissions:
@@ -49,6 +50,8 @@ jobs:
         run: |-
           docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev" -t ${{ env.CR_SERVICE }}:dev .
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev"
+  
+  # Deploy        
   deploy:
     # Add 'id-token' with the intended permissions for workload identity federation
     needs: build
@@ -66,10 +69,9 @@ jobs:
         uses: "google-github-actions/auth@v2"
         with:
           token_format: "access_token"
-          workload_identity_provider: "${{ secrets.WIF_PROVIDER }}" # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}" # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+          workload_identity_provider: "${{ secrets.WIF_PROVIDER }}" 
+          service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}"
 
-      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
@@ -81,12 +83,6 @@ jobs:
         run: |
           echo "$(gcloud auth print-access-token)" | docker login -u oauth2accesstoken \
           --password-stdin https://${{ env.GAR_LOCATION }}-docker.pkg.dev
-
-      # # Authenticate Docker to Google Cloud Artifact Registry
-      # - name: Docker Auth Build and Push Container
-      #   run: |-
-      #     docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev" -t ${{ env.CR_SERVICE }}:dev .
-      #     docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev"
 
       # END - Docker auth and build
       - name: Deploy to Cloud Run
