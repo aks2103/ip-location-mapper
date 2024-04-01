@@ -12,7 +12,7 @@ env:
   REGION: us-central1
 
 jobs:
-  config:
+  build:
     # Add 'id-token' with the intended permissions for workload identity federation
     permissions:
       contents: "read"
@@ -28,38 +28,74 @@ jobs:
         uses: "google-github-actions/auth@v2"
         with:
           token_format: "access_token"
-          workload_identity_provider: "${{ secrets.WIF_PROVIDER }}"
-          service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}"
+          workload_identity_provider: "${{ secrets.WIF_PROVIDER }}" # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}" # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
+      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
           version: ">= 363.0.0"
           project_id: ${{ env.PROJECT_ID }}
 
-  build:
-    needs: config
-    steps:
+      # After successfully authenticating with Google Cloud in previous steps...
       - name: Authenticate Docker with gcloud
         run: |
           echo "$(gcloud auth print-access-token)" | docker login -u oauth2accesstoken \
-            --password-stdin https://${{ env.GAR_LOCATION }}-docker.pkg.dev
+          --password-stdin https://${{ env.GAR_LOCATION }}-docker.pkg.dev
 
+      # Authenticate Docker to Google Cloud Artifact Registry
       - name: Docker Auth Build and Push Container
         run: |-
-          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:latest" -t ${{ env.CR_SERVICE }}:dev .
+          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev" -t ${{ env.CR_SERVICE }}:dev .
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev"
-
   deploy:
+    # Add 'id-token' with the intended permissions for workload identity federation
     needs: build
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Google Auth
+        id: auth
+        uses: "google-github-actions/auth@v2"
+        with:
+          token_format: "access_token"
+          workload_identity_provider: "${{ secrets.WIF_PROVIDER }}" # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: "${{ secrets.WIF_SERVICE_ACCOUNT }}" # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+
+      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: ">= 363.0.0"
+          project_id: ${{ env.PROJECT_ID }}
+
+      # After successfully authenticating with Google Cloud in previous steps...
+      - name: Authenticate Docker with gcloud
+        run: |
+          echo "$(gcloud auth print-access-token)" | docker login -u oauth2accesstoken \
+          --password-stdin https://${{ env.GAR_LOCATION }}-docker.pkg.dev
+
+      # # Authenticate Docker to Google Cloud Artifact Registry
+      # - name: Docker Auth Build and Push Container
+      #   run: |-
+      #     docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev" -t ${{ env.CR_SERVICE }}:dev .
+      #     docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev"
+
+      # END - Docker auth and build
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy \${{ env.CR_SERVICE }} \
             --quiet \
             --description "Cloud Run deployment from GitHub Actions, for IP & Location service" \
             --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.CR_SERVICE }}:dev \
-                      --region ${{ env.REGION }} \
+            --region ${{ env.REGION }} \
             --project ${{ env.PROJECT_ID }} \
             --max-instances 2 \
             --port 80 \
